@@ -1,16 +1,13 @@
-<!-- public/index.html -->
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Descargador Media</title>
+    <title>Media Downloader</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             padding: 20px;
-            max-width: 500px;
-            margin: 0 auto;
             background: var(--tg-theme-bg-color, #fff);
             color: var(--tg-theme-text-color, #000);
         }
@@ -22,34 +19,24 @@
         input, select, button {
             padding: 10px;
             border-radius: 8px;
-            border: 1px solid var(--tg-theme-hint-color, #999);
-            background: var(--tg-theme-bg-color, #fff);
-            color: var(--tg-theme-text-color, #000);
         }
         button {
             background: var(--tg-theme-button-color, #2481cc);
             color: var(--tg-theme-button-text-color, #fff);
             border: none;
-            cursor: pointer;
         }
         .status {
             padding: 10px;
             border-radius: 8px;
             display: none;
         }
-        .error {
-            background: #ffebee;
-            color: #c62828;
-        }
-        .success {
-            background: #e8f5e9;
-            color: #2e7d32;
-        }
+        .error { background: #ffebee; color: #c62828; }
+        .success { background: #e8f5e9; color: #2e7d32; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Descargador de Media</h2>
+        <h2>Media Downloader</h2>
         <input type="url" id="url" placeholder="URL del medio" required>
         <select id="format">
             <option value="mp4">MP4 Video</option>
@@ -68,37 +55,23 @@
             const format = document.getElementById('format').value;
             const status = document.getElementById('status');
             
-            if (!url) {
-                showStatus('Por favor ingresa una URL válida', 'error');
-                return;
-            }
-            
             try {
                 status.style.display = 'block';
                 status.textContent = 'Iniciando descarga...';
                 status.className = 'status';
                 
-                const response = await fetch('/api/download', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ url, format })
-                });
+                // Enviar datos al bot para procesar
+                tg.sendData(JSON.stringify({ url, format }));
                 
-                const data = await response.json();
+                // Mostrar mensaje de éxito
+                showStatus('Solicitud enviada al bot', 'success');
                 
-                if (data.error) {
-                    showStatus(data.error, 'error');
-                } else {
-                    showStatus('¡Descarga completada!', 'success');
-                    tg.sendData(JSON.stringify({
-                        file: data.file,
-                        format: format
-                    }));
-                }
+                // Cerrar mini app después de un momento
+                setTimeout(() => {
+                    tg.close();
+                }, 2000);
             } catch (error) {
-                showStatus('Error en la descarga: ' + error.message, 'error');
+                showStatus('Error: ' + error.message, 'error');
             }
         }
         
